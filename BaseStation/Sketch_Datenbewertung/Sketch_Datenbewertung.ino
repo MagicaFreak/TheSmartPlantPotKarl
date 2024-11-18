@@ -69,7 +69,15 @@ int calculate_rating_humidity(int top, int bottom, float value_read)
 
 int calculate_rating_temp(int top, int bottom, float value_read)
 {
-  
+  if(value_read >= (float) top)
+  {
+    return 100;
+  }
+  if(value_read <= (float) bottom)
+  {
+    return -100;
+  }
+  return (100.0/(step_value(top, bottom) * step_value(top, bottom))) * (value_read - mean_value(top, bottom)) * (value_read - mean_value(top, bottom));
 }
 
 //Used next to find the absolute value of light difference between opposite sensors
@@ -112,7 +120,7 @@ void loop()
   int balance_light_sensor_pairs[N_LIGHT_SENSORS] = {0, 0, 0, 0};
   
   //Calculate the individual rating for every variable
-  //float Rating_Temp = calculate_rating(MAX_TEMP, MIN_TEMP, mySensorData.Air_Temp);
+  int Rating_Temp = calculate_rating_temp(MAX_TEMP, MIN_TEMP, mySensorData.Air_Temp);
   int Rating_Air_Humid = calculate_rating_humidity(MAX_AIR_HUM, MIN_AIR_HUM, mySensorData.Air_Hum);
   int Rating_Soil_Humid = calculate_rating_humidity(MAX_SOI_HUM, MIN_SOI_HUM, mySensorData.Soil_Hum);
 
@@ -138,30 +146,30 @@ void loop()
   }
 
   //Possible errors to be found according to each individual rating
-  if(Rating_Temp > 1.0)
+  if(Rating_Temp > 100)
   {
     Serial.println("Plant temperature conditions too hot");
   }
-  if(Rating_Temp < -1.0)
+  if(Rating_Temp < -100)
   {
     Serial.println("Plant temperature conditions too cold");
   }
 
-  if(Rating_Air_Humid > 1.0)
+  if(Rating_Air_Humid > 100)
   {
     Serial.println("Plant air humidity conditions too humid");
   }
 
-  if(Rating_Air_Humid < -1.0)
+  if(Rating_Air_Humid < -100)
   {
     Serial.println("Plant air humidity conditions too dry");
   }
-  if(Ratin_Soil_Humid > 1.0)
+  if(Ratin_Soil_Humid > 100)
   {
     Serial.println("Plant soil humidity conditions too humid");
   }
 
-  if(Rating_Soil_Humid < -1.0)
+  if(Rating_Soil_Humid < -100)
   {
     Serial.println("Plant soil humidity conditions too dry");
   }
