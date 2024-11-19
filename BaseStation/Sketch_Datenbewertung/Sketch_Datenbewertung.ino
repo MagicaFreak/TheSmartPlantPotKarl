@@ -2,11 +2,10 @@
 #include <WiFi.h>
 #include <math.h>
 //Constants stored in Header-File
-#include "Bewertungskonstanten.h"
+#include "Bewegungskonstanten.h"
 
 //includes for the upload to website, not yet done
-#include <WebServer.h>
-#include <WebSocketServer.h>
+
 
 
 //Data I would receive from Kevin
@@ -32,15 +31,15 @@ void OnDataRecv(const esp_now_recv_info *info, const uint8_t* incomingData, int 
           info->src_addr[0], info->src_addr[1], info->src_addr[2], info->src_addr[3], info->src_addr[4], info->src_addr[5]);    
   Serial.println("Received Data");
   Serial.print("Temperature in Celsius: ");
-  Serial.println("%.2f", mySensorData.t);
+  Serial.println(mySensorData.t);
   Serial.print("Air Humidity: ");
-  Serial.println("%.2f", mySensorData.h);
+  Serial.println(mySensorData.h);
   Serial.print("Soil Humidity: ");
   Serial.println(mySensorData.B);
-  String output = mySensorData.L1 + ", " + mySensorData.L2 + ", " + mySensorData.L3 + ", " + mySensorData.L4
-    + ", " + mySensorData.L5 + ", " + mySensorData.L6 + ", " + mySensorData.L7 + ", " + mySensorData.L8;
+  //String output = mySensorData.L1 + ", " + mySensorData.L2 + ", " + mySensorData.L3 + ", " + mySensorData.L4
+  //  + ", " + mySensorData.L5 + ", " + mySensorData.L6 + ", " + mySensorData.L7 + ", " + mySensorData.L8;
   Serial.print("Light intensity sensors: ");
-  Serial.print(output);
+  //Serial.print(output);
 }
 
 //Calculate a Rating for the conditions temperature and both humidities
@@ -155,7 +154,7 @@ void loop()
   {
     Serial.println("Plant air humidity conditions too dry");
   }
-  if(Ratin_Soil_Humid > 100)
+  if(Rating_Soil_Humid > 100)
   {
     Serial.println("Plant soil humidity conditions too humid");
   }
