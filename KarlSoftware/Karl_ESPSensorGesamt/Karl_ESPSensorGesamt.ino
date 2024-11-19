@@ -43,6 +43,15 @@ int adc_id8 = 8;
 
 DHT dht(DHTPIN, DHTTYPE);
 
+void OnDataSent(const uint8_t* mac_address, esp_now_send_status_t status)
+{
+  Serial.print("Sending Transmitter data: ");
+  if(status != ESP_NOW_SEND_SUCCESS)
+  {
+    Serial.println("Transmission failed");
+  }
+}
+
 void setup() 
 
 {
@@ -54,7 +63,7 @@ void setup()
   WiFi.mode(WIFI_STA);
   
   esp_now_init();
-
+  esp_now_register_send_cb(OnDataSent);
 
   memcpy(peerInfo.peer_addr, broadcastAddress, 6);
   peerInfo.channel = 0;
@@ -146,16 +155,16 @@ void loop() {
   mySensorData.h = h;
   mySensorData.t = t;
   mySensorData.B = B;
-  mySensordata.L1 = L1;
-  mySensordata.L2 = L2;
-  mySensordata.L3 = L3;
-  mySensordata.L4 = L4;
-  mySensordata.L5 = L5;
-  mySensordata.L6 = L6;
-  mySensordata.L7 = L7;
-  mySensordata.L8 = L8;
+  mySensorData.L1 = L1;
+  mySensorData.L2 = L2;
+  mySensorData.L3 = L3;
+  mySensorData.L4 = L4;
+  mySensorData.L5 = L5;
+  mySensorData.L6 = L6;
+  mySensorData.L7 = L7;
+  mySensorData.L8 = L8;
   //Sendata ESP NOW
-  esp_now_send(mySensorData);
+  esp_now_send(broadcastAddress, (uint8_t *) &mySensorData, sizeof(mySensorData));
  
 
 }
