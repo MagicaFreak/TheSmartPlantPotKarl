@@ -9,7 +9,7 @@
 #include <WebSocketServer.h>
 
 
-//Data I suppose I would receive from Kevin
+//Data I would receive from Kevin
 typedef struct sensorData
 {
   float Air_Temp;
@@ -63,31 +63,22 @@ int calculate_rating_humidity(int top, int bottom, float value_read)
   {
     return -100;
   }
-  return (100.0 / step_value(top, bottom)) * (value_read - mean_value(top, bottom));
+  return round((100.0 / step_value(top, bottom)) * (value_read - mean_value(top, bottom)));
 }
 
 
 int calculate_rating_temp(int top, int bottom, float value_read)
 {
   if(value_read >= (float) top)
-  {
     return 100;
-  }
+  
   if(value_read <= (float) bottom)
-  {
     return -100;
-  }
-  return (100.0/(step_value(top, bottom) * step_value(top, bottom))) * (value_read - mean_value(top, bottom)) * (value_read - mean_value(top, bottom));
-}
-
-//Used next to find the absolute value of light difference between opposite sensors
-float absolute(float value)
-{
-  if(value < 0.0)
-  {
-    return -1.0 * value;
-  }
-  return value;
+  
+  float rating = (100.0/(step_value(top, bottom) * step_value(top, bottom))) * (value_read - mean_value(top, bottom)) * (value_read - mean_value(top, bottom));
+  if(rating < mean_value(top, bottom))
+    return round(-1.0 * rating);
+  return round(rating);
 }
 
 
