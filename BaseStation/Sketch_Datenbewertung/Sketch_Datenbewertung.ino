@@ -10,16 +10,16 @@
 
 
 //Data I would receive from Kevin
-typedef struct sensorData
+typedef struct SensorData
 {
-  float Air_Temp;
-  float Air_Hum;
-  float Soil_Hum;
+  float t;
+  float h;
+  float B;
 
-  int Light_intense_sensor_1; int Light_intense_sensor_2;
-  int Light_intense_sensor_3; int Light_intense_sensor_4;
-  int Light_intense_sensor_5; int Light_intense_sensor_6;
-  int Light_intense_sensor_7; int Light_intense_sensor_8;
+  int L1; int L2;
+  int L3; int L4;
+  int L5; int L6;
+  int L7; int L8;
   
 } sensorData;
 
@@ -32,13 +32,13 @@ void OnDataRecv(const esp_now_recv_info *info, const uint8_t* incomingData, int 
           info->src_addr[0], info->src_addr[1], info->src_addr[2], info->src_addr[3], info->src_addr[4], info->src_addr[5]);    
   Serial.println("Received Data");
   Serial.print("Temperature in Celsius: ");
-  Serial.println("%.2f", mySensorData.Air_Temp);
+  Serial.println("%.2f", mySensorData.t);
   Serial.print("Air Humidity: ");
-  Serial.println("%.2f", mySensorData.Air_Hum);
+  Serial.println("%.2f", mySensorData.h);
   Serial.print("Soil Humidity: ");
-  Serial.println(mySensorData.Soil_Hum);
-  String output = Light_intense_sensor_1 + ", " + Light_intense_sensor_2 + ", " + Light_intense_sensor_3 + ", " + Light_intense_sensor_4
-    + ", " + Light_intense_sensor_5 + ", " + Light_intense_sensor_6 + ", " + Light_intense_sensor_7 + ", " + Light_intense_sensor_8;
+  Serial.println(mySensorData.B);
+  String output = mySensorData.L1 + ", " + mySensorData.L2 + ", " + mySensorData.L3 + ", " + mySensorData.L4
+    + ", " + mySensorData.L5 + ", " + mySensorData.L6 + ", " + mySensorData.L7 + ", " + mySensorData.L8;
   Serial.print("Light intensity sensors: ");
   Serial.print(output);
 }
@@ -97,10 +97,10 @@ void setup() {
 void loop() 
 {
   //In case I receive the light-intensity data as individual floats
-  int Light_intense[N_LIGHT_SENSORS] = {mySensorData.Light_intense_sensor_1, mySensorData.Light_intense_sensor_2,
-                                          mySensorData.Light_intense_sensor_3, mySensorData.Light_intense_sensor_4,
-                                          mySensorData.Light_intense_sensor_5, mySensorData.Light_intense_sensor_6,
-                                          mySensorData.Light_intense_sensor_7, mySensorData.Light_intense_sensor_8};
+  int Light_intense[N_LIGHT_SENSORS] = {mySensorData.L1, mySensorData.L2,
+                                          mySensorData.L3, mySensorData.L4,
+                                          mySensorData.L5, mySensorData.L6,
+                                          mySensorData.L7, mySensorData.L8};
 
   
   //Array to determine which type of imbalance we have for opposing sensors
@@ -111,9 +111,9 @@ void loop()
   int balance_light_sensor_pairs[N_LIGHT_SENSORS] = {0, 0, 0, 0};
   
   //Calculate the individual rating for every variable
-  int Rating_Temp = calculate_rating_temp(MAX_TEMP, MIN_TEMP, mySensorData.Air_Temp);
-  int Rating_Air_Humid = calculate_rating_humidity(MAX_AIR_HUM, MIN_AIR_HUM, mySensorData.Air_Hum);
-  int Rating_Soil_Humid = calculate_rating_humidity(MAX_SOI_HUM, MIN_SOI_HUM, mySensorData.Soil_Hum);
+  int Rating_Temp = calculate_rating_temp(MAX_TEMP, MIN_TEMP, mySensorData.t);
+  int Rating_Air_Humid = calculate_rating_humidity(MAX_AIR_HUM, MIN_AIR_HUM, mySensorData.h);
+  int Rating_Soil_Humid = calculate_rating_humidity(MAX_SOI_HUM, MIN_SOI_HUM, mySensorData.B);
 
 
   for(int i = 0; i < N_LIGHT_SENSORS/2; i++)
