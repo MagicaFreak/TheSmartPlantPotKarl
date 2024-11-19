@@ -19,7 +19,9 @@ typedef struct SensorData
   int L3; int L4;
   int L5; int L6;
   int L7; int L8;
-};
+} sensorData;
+
+sensorData mySensorData;
 
 //ESPNOW zeug AUskommentiert
 uint8_t broadcastAddress[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
@@ -140,8 +142,20 @@ void loop() {
   Serial.print(F("Lightsensor 8: "));
   Serial.print(L8);
 
+
+  mySensorData.h = h;
+  mySensorData.t = t;
+  mySensorData.B = B;
+  mySensordata.L1 = L1;
+  mySensordata.L2 = L2;
+  mySensordata.L3 = L3;
+  mySensordata.L4 = L4;
+  mySensordata.L5 = L5;
+  mySensordata.L6 = L6;
+  mySensordata.L7 = L7;
+  mySensordata.L8 = L8;
   //Sendata ESP NOW
-  //esp_now_send(receiverAdress, Sensordaten, sizeof(Sensordaten)-1);
+  esp_now_send(mySensorData);
  
 
 }
