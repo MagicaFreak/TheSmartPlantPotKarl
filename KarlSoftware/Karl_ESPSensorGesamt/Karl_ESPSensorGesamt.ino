@@ -24,7 +24,7 @@ typedef struct SensorData
 sensorData mySensorData;
 
 //ESPNOW zeug AUskommentiert
-uint8_t broadcastAddress[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+uint8_t broadcastAddress[] = {0xF0,0x9E,0x9E,0x3B,0x37,0x84};
 esp_now_peer_info_t peerInfo;
 
 
@@ -45,7 +45,7 @@ DHT dht(DHTPIN, DHTTYPE);
 
 void OnDataSent(const uint8_t* mac_address, esp_now_send_status_t status)
 {
-  Serial.print("Sending Transmitter data: ");
+  Serial.print("\n Sending Transmitter data: ");
   if(status != ESP_NOW_SEND_SUCCESS)
   {
     Serial.println("Transmission failed");
@@ -108,13 +108,13 @@ void loop() {
   // Check if any reads failed and exit early (to try again).
   if (isnan(h) || isnan(t))
   {
-    Serial.println(F("Failed to read from DHT sensor!"));
+    Serial.println(F("\n Failed to read from DHT sensor!"));
     
   }
   // Check if any reads failed and exit early (to try again).
   if (isnan(B))
   {
-    Serial.println(F("Failed to read from Groundhumidity sensor!"));
+    Serial.println(F("\n Failed to read from Groundhumidity sensor!"));
   }
 
 
@@ -134,21 +134,21 @@ void loop() {
 
   //Serialmonitor Fotoresistor
 
-  Serial.print(F("Lightsensor 1: "));
+  Serial.print(F("\n Lightsensor 1: "));
   Serial.print(L1);
-  Serial.print(F("Lightsensor 2: "));
+  Serial.print(F("\n Lightsensor 2: "));
   Serial.print(L2);
-  Serial.print(F("Lightsensor 3: "));
+  Serial.print(F("\n Lightsensor 3: "));
   Serial.print(L3);
-  Serial.print(F("Lightsensor 4: "));
+  Serial.print(F("\n Lightsensor 4: "));
   Serial.print(L4);
-  Serial.print(F("Lightsensor 5: "));
+  Serial.print(F("\n Lightsensor 5: "));
   Serial.print(L5);
-  Serial.print(F("Lightsensor 6: "));
+  Serial.print(F("\n Lightsensor 6: "));
   Serial.print(L6);
-  Serial.print(F("Lightsensor 7: "));
+  Serial.print(F("\n Lightsensor 7: "));
   Serial.print(L7);
-  Serial.print(F("Lightsensor 8: "));
+  Serial.print(F("\n Lightsensor 8: "));
   Serial.print(L8);
 
 
