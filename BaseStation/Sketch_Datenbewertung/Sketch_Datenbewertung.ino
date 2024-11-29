@@ -1,12 +1,23 @@
 #include <esp_now.h>
 #include <WiFi.h>
 #include <math.h>
-//Constants stored in Header-File
-#include "Bewegungskonstanten.h"
-
 //includes for the upload to website, not yet done
 
 
+//ideale Bedingungen fuer Temperatur zwischen 16 und 30 Grad Celsius
+#define MAX_TEMP 30
+#define MIN_TEMP 16
+//ideale Bedingungen zwischen 40% und 80% relative Luftfeuchtigkeit
+#define MAX_AIR_HUM 80
+#define MIN_AIR_HUM 40
+//ideale Bedingungen zwischen 50% und 80% relative Bodenfeuchtigkeit
+#define MAX_SOI_HUM 80
+#define MIN_SOI_HUM 50
+
+//ideale Lichtintensitaet Bedingungen muessen zwischen 100-600umol/m2s oder PPFD sein
+//Wie das zu gross fuer die Lichtwiderstaende ist und diese Wert von PPFD ist auch von der Lichtquelle abhaengig,
+//wir messen nur welche Sensor am meisten Licht bekommt
+#define N_LIGHT_SENSORS 8
 
 //Data I would receive from Kevin
 typedef struct SensorData
@@ -62,7 +73,7 @@ int calculate_rating_humidity(int top, int bottom, float value_read)
   {
     return -100;
   }
-  return round((100.0 / step_value(top, bottom)) * (value_read - mean_value(top, bottom)));
+  return roundf((100.0 / step_value(top, bottom)) * (value_read - mean_value(top, bottom)));
 }
 
 
@@ -70,14 +81,26 @@ int calculate_rating_temp(int top, int bottom, float value_read)
 {
   if(value_read >= (float) top)
     return 100;
-  
+
   if(value_read <= (float) bottom)
     return -100;
   
   float rating = (100.0/(step_value(top, bottom) * step_value(top, bottom))) * (value_read - mean_value(top, bottom)) * (value_read - mean_value(top, bottom));
-  if(rating < mean_value(top, bottom))
-    return round(-1.0 * rating);
-  return round(rating);
+  if(value_read < (float) mean_value(top, bottom))
+    return roundf(-1.0 * rating);
+  return roundf(rating);
+}
+
+int find_max_light_sensor(int array[], int groesse)
+{
+  int hoechste_index = 0;
+
+  for(int i = 1; i < groesse; i++)
+  {
+    if(array[i] > array[hoechste_index])
+      hoechste_index = i;
+  }
+  return hoechste_index + 1;
 }
 
 
@@ -96,10 +119,10 @@ void setup() {
 void loop() 
 {
   //In case I receive the light-intensity data as individual floats
-  int Light_intense[N_LIGHT_SENSORS] = {mySensorData.L1, mySensorData.L2,
-                                          mySensorData.L3, mySensorData.L4,
-                                          mySensorData.L5, mySensorData.L6,
-                                          mySensorData.L7, mySensorData.L8};
+  int Light_intense[] = {mySensorData.L1, mySensorData.L2,
+                         mySensorData.L3, mySensorData.L4,
+                         mySensorData.L5, mySensorData.L6,
+                         mySensorData.L7, mySensorData.L8};
 
   
   //Array to determine which type of imbalance we have for opposing sensors
@@ -107,59 +130,42 @@ void loop()
     //0 = no imbalance
     //1 = imbalance: higher-number sensor is receiving too much light in comparison to lower-number sensor
     //-1 = imbalance: higher-number sensor is receiving too much light in comparison to lower-number sensor
-  int balance_light_sensor_pairs[N_LIGHT_SENSORS] = {0, 0, 0, 0};
   
   //Calculate the individual rating for every variable
   int Rating_Temp = calculate_rating_temp(MAX_TEMP, MIN_TEMP, mySensorData.t);
   int Rating_Air_Humid = calculate_rating_humidity(MAX_AIR_HUM, MIN_AIR_HUM, mySensorData.h);
   int Rating_Soil_Humid = calculate_rating_humidity(MAX_SOI_HUM, MIN_SOI_HUM, mySensorData.B);
 
-
-  for(int i = 0; i < N_LIGHT_SENSORS/2; i++)
-  {
-    int index_2 = i + N_LIGHT_SENSORS/2;
-    if(abs(Light_intense[i] - Light_intense[index_2]) > MAX_LIGHT_DIFF)
-    {
-      Serial.print("Light imbalance found: Sensor No. ");
-      if(Light_intense[i] > Light_intense[index_2])
-      {
-        balance_light_sensor_pairs[i] += 1;
-        Serial.print(index_2 + 1);
-      }
-      if(Light_intense[i] < Light_intense[index_2])
-      {
-        balance_light_sensor_pairs[i] -= 1;
-        Serial.print(i + 1);
-      }
-      Serial.println(" is not receiving enough light compared to its opposite");
-    }
-  }
+  int Brightest_Sensor_index = find_max_light_sensor(Light_intense, N_LIGHT_SENSORS);
+  Serial.print("Light sensor No. ");
+  Serial.print(Brightest_Sensor_index);
+  Serial.println(" is receiving the most light");
 
   //Possible errors to be found according to each individual rating
-  if(Rating_Temp > 100)
+  if(Rating_Temp >= 100)
   {
     Serial.println("Plant temperature conditions too hot");
   }
-  if(Rating_Temp < -100)
+  if(Rating_Temp <= -100)
   {
     Serial.println("Plant temperature conditions too cold");
   }
 
-  if(Rating_Air_Humid > 100)
+  if(Rating_Air_Humid >= 100)
   {
     Serial.println("Plant air humidity conditions too humid");
   }
 
-  if(Rating_Air_Humid < -100)
+  if(Rating_Air_Humid <= -100)
   {
     Serial.println("Plant air humidity conditions too dry");
   }
-  if(Rating_Soil_Humid > 100)
+  if(Rating_Soil_Humid >= 100)
   {
     Serial.println("Plant soil humidity conditions too humid");
   }
 
-  if(Rating_Soil_Humid < -100)
+  if(Rating_Soil_Humid <= -100)
   {
     Serial.println("Plant soil humidity conditions too dry");
   }
